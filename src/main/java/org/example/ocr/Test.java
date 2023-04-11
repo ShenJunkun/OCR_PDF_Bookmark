@@ -13,13 +13,15 @@ public class Test {
         // 可选的配置项
         Map<String, Object> arguments = new HashMap<>();
         // arguments.put("use_angle_cls", true);
-
+        String currentDirectory = System.getProperty("user.dir");
+        System.out.println("当前目录路径为：" + currentDirectory);
         // 初始化 OCR
         try (Ocr ocr = new Ocr(new File(exePath), arguments)) {
 
             // 对一张图片进行 OCR
             String imgPath = "C:\\Users\\shenj\\Pictures\\1.jpg";
-            OcrResponse resp = ocr.runOcr(new File(imgPath));
+            String imgPath1 = currentDirectory + File.separator + "data" + File.separator + "1.png";
+            OcrResponse resp = ocr.runOcr(new File(imgPath1));
 
             // 或者直接识别剪贴板中的图片
             // OcrResponse resp = ocr.runOcrOnClipboard();

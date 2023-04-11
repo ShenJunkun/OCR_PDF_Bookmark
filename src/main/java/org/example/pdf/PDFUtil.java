@@ -2,7 +2,12 @@ package org.example.pdf;
 
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -116,5 +121,20 @@ public class PDFUtil {
         }
     }
 
+    public static void pdfToImage(int sart, int end, String fileName) {
+        try {
+            PDDocument document = PDDocument.load(new File(fileName));
+
+            PDFRenderer renderer = new PDFRenderer(document);
+
+            BufferedImage image = renderer.renderImageWithDPI(0, 300);
+            ImageIO.write(image, "png", new File("data/1.png"));
+            document.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
 
 }
