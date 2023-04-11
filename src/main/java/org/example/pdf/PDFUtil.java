@@ -121,14 +121,17 @@ public class PDFUtil {
         }
     }
 
-    public static void pdfToImage(int sart, int end, String fileName) {
+    public static void pdfToImage(int start, int end, String fileName, List<String> imgList) {
         try {
             PDDocument document = PDDocument.load(new File(fileName));
 
             PDFRenderer renderer = new PDFRenderer(document);
-
-            BufferedImage image = renderer.renderImageWithDPI(0, 300);
-            ImageIO.write(image, "png", new File("data/1.png"));
+            for (int i = start; i <= end; i++) {
+                BufferedImage image = renderer.renderImageWithDPI(i - 1, 300);
+                String imgName = "data/" + i + ".png";
+                ImageIO.write(image, "png", new File(imgName));
+                imgList.add(imgName);
+            }
             document.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
