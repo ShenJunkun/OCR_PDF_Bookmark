@@ -36,7 +36,16 @@ public class Main extends Application {
         Button getContents = new Button("获取目录");
 
         getContents.setDisable(true);
-        HBox h = new HBox(20, getContents, contentsGenerator);
+
+        TextField catalogStart = new TextField();
+        catalogStart.setPromptText("目录开始页");
+        catalogStart.setPrefWidth(100);
+
+        TextField catalogEnd = new TextField();
+        catalogEnd.setPromptText("目录截止页");
+        catalogEnd.setPrefWidth(100);
+
+        HBox h = new HBox(20, catalogStart, catalogEnd,getContents, contentsGenerator);
 
         h.setAlignment(Pos.CENTER);
 
