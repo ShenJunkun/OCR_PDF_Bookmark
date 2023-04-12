@@ -128,7 +128,15 @@ public class PDFUtil {
             PDFRenderer renderer = new PDFRenderer(document);
             for (int i = start; i <= end; i++) {
                 BufferedImage image = renderer.renderImageWithDPI(i - 1, 300);
-                String imgName = "data/" + i + ".png";
+                String currentDirectory = System.getProperty("user.dir");
+                System.out.println(currentDirectory);
+                String dictPath =currentDirectory + File.separator + "data1";
+                File directory = new File(dictPath);
+                if (!directory.exists()) {
+                    boolean success = directory.mkdirs();
+                    System.out.println(success);
+                }
+                String imgName = dictPath + File.separator  + i + ".png";
                 ImageIO.write(image, "png", new File(imgName));
                 imgList.add(imgName);
             }

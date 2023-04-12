@@ -1,5 +1,6 @@
 package org.example.gui;
 
+import com.itextpdf.text.List;
 import com.itextpdf.text.exceptions.BadPasswordException;
 import javafx.application.Application;
 import javafx.geometry.Pos;
@@ -13,10 +14,13 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.example.ocr.OcrResponse;
+import org.example.ocr.OcrUtils;
 import org.example.pdf.PDFContents;
 import org.example.pdf.PDFUtil;
 
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  * Created by ifnoelse on 2017/3/2 0002.
@@ -31,6 +35,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("pdf bookmark");
 
+        //bottom
         BorderPane bottomPane = new BorderPane();
         Button contentsGenerator = new Button("生成目录");
         Button getContents = new Button("获取目录");
@@ -45,12 +50,16 @@ public class Main extends Application {
         catalogEnd.setPromptText("目录截止页");
         catalogEnd.setPrefWidth(100);
 
-        HBox h = new HBox(20, catalogStart, catalogEnd,getContents, contentsGenerator);
+        Button ocrButton = new Button("OCR");
+//        ocrButton.setDisable(true);
+
+        HBox h = new HBox(20, catalogStart, catalogEnd, ocrButton, getContents, contentsGenerator);
 
         h.setAlignment(Pos.CENTER);
 
         bottomPane.setCenter(h);
 
+        // top
         Button fileSelectorBtn = new Button("选择文件");
 
 
@@ -72,11 +81,12 @@ public class Main extends Application {
         pageIndexOffset.setPrefWidth(100);
 
 
+        //textArea
         TextArea textArea = new TextArea();
 
 
         textArea.setPromptText("请在此填入目录内容");
-
+        //处理拖拽文件
         textArea.setOnDragEntered(e -> {
             Dragboard dragboard = e.getDragboard();
             File file = dragboard.getFiles().get(0); //获取拖入的文件
@@ -86,7 +96,7 @@ public class Main extends Application {
             }
         });
 
-
+        // http
         textArea.textProperty().addListener(event -> {
             if (textArea.getText().trim().startsWith("http")) {
                 getContents.setDisable(false);
@@ -102,6 +112,7 @@ public class Main extends Application {
         Scene scene = new Scene(vBox, 600, 400);
         primaryStage.setScene(scene);
 
+        //通过 选择文件按钮来选择文件
         fileSelectorBtn.setOnAction(event -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("pdf", "*.pdf"));
@@ -113,7 +124,7 @@ public class Main extends Application {
 
         });
 
-
+        //pdf offset设置
         pageIndexOffset.focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (!observable.getValue()) {
                 String offset = pageIndexOffset.getText();
@@ -124,11 +135,59 @@ public class Main extends Application {
             }
         });
 
+        //目录起始页设置
+        catalogStart.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (!observable.getValue()) {
+                String offset = catalogStart.getText();
+                if (offset != null && offset.length() > 0 && !offset.matches("[0-9]+")) {
+                    showDialog("错误", "偏移量设置错误", "页码偏移量只能为整数", Alert.AlertType.ERROR);
+                }
+            }
+        });
+
+        //目录终止页设置
+        catalogEnd.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (!observable.getValue()) {
+                String offset = catalogEnd.getText();
+                if (offset != null && offset.length() > 0 && !offset.matches("[0-9]+")) {
+                    showDialog("错误", "偏移量设置错误", "页码偏移量只能为整数", Alert.AlertType.ERROR);
+                }
+            }
+        });
+
+        //目录文本框设置
         getContents.setOnAction(event -> {
             String contents = PDFContents.getContentsByUrl(textArea.getText());
             textArea.setText(contents);
         });
 
+        //ocr
+
+        ocrButton.setOnAction(event -> {
+
+            String fp = filePath.getText();
+            if (fp == null || fp.isEmpty()) {
+                showDialog("错误", "pdf文件路径为空", "pdf文件路径不能为空，请选择pdf文件", Alert.AlertType.ERROR);
+                return;
+            }
+            String srcFile = fp.replaceAll("\\\\", "/");
+//            System.out.println("ocr button");
+            String startOffset = catalogStart.getText();
+            String endOffset = catalogEnd.getText();
+            //pdf catalog to image
+            int start = Integer.parseInt(startOffset != null && !startOffset.isEmpty() ? startOffset : "0");
+            int end = Integer.parseInt(endOffset != null && !endOffset.isEmpty() ? endOffset : "0");
+            java.util.List<String> imgName = new ArrayList<>();
+            PDFUtil.pdfToImage(start, end, srcFile, imgName);
+            for (String img : imgName) {
+                OcrResponse ocrResponse = OcrUtils.orc(img);
+
+            }
+
+        });
+
+
+        //生成目录
         contentsGenerator.setOnAction(event -> {
             String fp = filePath.getText();
             if (fp == null || fp.isEmpty()) {
