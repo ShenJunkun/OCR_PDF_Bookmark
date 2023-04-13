@@ -14,6 +14,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.example.ocr.Ocr;
 import org.example.ocr.OcrResponse;
 import org.example.ocr.OcrUtils;
 import org.example.pdf.PDFContents;
@@ -179,10 +180,12 @@ public class Main extends Application {
             int end = Integer.parseInt(endOffset != null && !endOffset.isEmpty() ? endOffset : "0");
             java.util.List<String> imgName = new ArrayList<>();
             PDFUtil.pdfToImage(start, end, srcFile, imgName);
+            StringBuilder stringBuilder = new StringBuilder();
             for (String img : imgName) {
                 OcrResponse ocrResponse = OcrUtils.orc(img);
-
+                stringBuilder.append(OcrUtils.processOcrResponse(ocrResponse));
             }
+            textArea.setText(stringBuilder.toString());
 
         });
 
